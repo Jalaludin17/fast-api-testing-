@@ -11,3 +11,6 @@ def hello():
 def about():
     return {'message':'i am learning fastapi'}
 
+@app.get('/info')
+def info():
+    return {'message':'just an addition for understanding'}
