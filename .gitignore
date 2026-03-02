@@ -1,0 +1,35 @@
+# Virtual Environment
+.venv/
+venv/
+
+myenv/
+myvenv/
+venv/
+.env/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Data
+data/
+*.csv
+*.xlsx
+
+# ML artifacts
+artifacts/
+mlruns/
+*.pkl
+*.joblib
+
+# Notebooks checkpoints
+.ipynb_checkpoints/
+
+# Environment variables
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+guide.txt
