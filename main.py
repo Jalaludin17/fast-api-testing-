@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi import Path
 import json
 
@@ -30,4 +30,4 @@ def view_patient(patient_id: str = Path(..., description="The ID of the patient 
     
     if patient_id in data:
         return data[patient_id]
-    return {'message': 'Patient not found'}
+    raise HTTPException(status_code=404, detail="Patient not found")
