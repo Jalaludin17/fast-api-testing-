@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, Path, Query
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, computed_field
 from typing import Annotated, Optional, Literal
 import json
@@ -38,6 +39,10 @@ def load_data():
     
     return data 
 
+def save_data(data):
+    with open('patients.json', 'w') as f:
+        json.dump(data, f)
+
 #Retrieve 
 #define the route for our requests (get request)
 @app.get('/')
@@ -76,4 +81,18 @@ def sort_pateints(sort_by: str = Query(..., description="Sort on the basis of he
     sort_order = True if order == 'desc' else False
     sorted_data = sorted(data.values(), key=lambda x: x.get(sort_by, 0), reverse= sort_order)
     return sorted_data
+
+#Create 
+@app .post('/create')
+def create_patient(patient: Patient):
+    data = load_data() #it will bring all over data from json file and store in data variable as a dictionary
+    
+    if patient.id in data:
+        raise HTTPException(status_code=400, detail="Patient with this ID already exists")
+    
+    data[patient.id] = patient.model_dump(exclude={'id'}) #it will convert the patient object into a dictionary and store it in data variable with key as patient.id
+    
+    save_data(data) #it will save the updated data back to the json file
+    
+    return {"message": "Patient created successfully", "patient": patient.dict()}
 
