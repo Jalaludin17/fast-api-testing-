@@ -33,6 +33,15 @@ def verdict(self) -> str:
     else:
         return "obese"
 
+#update endpoint
+class PatientUpdate(BaseModel):
+    name: Optional[Annotated[str, Field(None, description="Full name of the patient", example="John Doe")]]
+    city : Optional[Annotated[str, Field(None, description="City of residence", example="New York")]]
+    age : Optional[Annotated[int, Field(None, gt=0, lt=120, description="Age of the patient", example=30)]]
+    gender : Optional[Annotated[Literal["Male", "Female", "Other"], Field(None, description="Gender of the patient", example="Male")]]
+    height : Optional[Annotated[float, Field(None, gt=0, description="Height of the patient in meters", example=1.75)]]
+    weight : Optional[Annotated[float, Field(None, gt=0, description="Weight of the patient in kilograms", example=70.5)]]          
+
 def load_data():
     with open('patients.json','r') as f:
         data = json.load(f)
@@ -87,12 +96,15 @@ def sort_pateints(sort_by: str = Query(..., description="Sort on the basis of he
 def create_patient(patient: Patient):
     data = load_data() #it will bring all over data from json file and store in data variable as a dictionary
     
+    #check patient existance 
     if patient.id in data:
         raise HTTPException(status_code=400, detail="Patient with this ID already exists")
     
+    #add new patient to data (merging old and new data)
     data[patient.id] = patient.model_dump(exclude={'id'}) #it will convert the patient object into a dictionary and store it in data variable with key as patient.id
     
+    #save the updated data back to the json file
     save_data(data) #it will save the updated data back to the json file
     
-    return {"message": "Patient created successfully", "patient": patient.dict()}
+    return JSONResponse(status_code=201, content={"message": "Patient created successfully"})
 
