@@ -92,7 +92,7 @@ def sort_pateints(sort_by: str = Query(..., description="Sort on the basis of he
     return sorted_data
 
 #Create 
-@app .post('/create')
+@app.post('/create')
 def create_patient(patient: Patient):
     data = load_data() #it will bring all over data from json file and store in data variable as a dictionary
     
@@ -108,3 +108,27 @@ def create_patient(patient: Patient):
     
     return JSONResponse(status_code=201, content={"message": "Patient created successfully"})
 
+#put or update request
+@app.put('/update/{patient_id}')
+def update_patient(patient_id: str, patient_update: PatientUpdate):
+    data = load_data()
+    
+    if patient_id not in data:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    
+    existing_patient = data[patient_id]
+    updated_patient = patient_update.model_dump(exclude_unset=True) #it will convert the patient_update object into a dictionary and store it in updated_patient variable, but only include fields that were provided in the request (exclude_unset=True)
+    
+    for key, value in updated_patient.items():
+        existing_patient[key] = value #it will update the existing patient data with the new values provided in the request
+    
+    #existing_patient -> pydantic model object -> updated bmi + verdict -> pydanctic model object -> dictionary
+    existing_patient['id'] = patient_id #it will add the patient_id to the existing_patient dictionary
+    patient_pydantic_obj = Patient(**existing_patient) #it will create a new Patient object using the existing_patient dictionary
+    existing_patient = patient_pydantic_obj.model_dump(exclude={'id'}) #it will convert the updated Patient object back into a dictionary and store it in existing_patient variable
+    
+    data[patient_id] = existing_patient #it will update the patient data in the data variable with the updated patient data
+    
+    return {"message": "Patient updated successfully"}
+
+    save_data(data) #it will save the updated data back to the json file
